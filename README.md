@@ -2,6 +2,24 @@
 
 Create dinners, add the groceries needed for each dinner, and tick off items while shopping. No photos, graphs, or cooking instructions. Items remain available after being ticked, so you can untick them for another shopping trip.
 
+## Install with HACS (recommended)
+
+1. Open HACS → three-dot menu → Custom repositories.
+2. Paste the full repository URL: `https://github.com/akugiz/dinner-shopping-card.`
+   The final dot is part of the current repository name.
+3. Select **Dashboard** (called Lovelace or Plugin in older versions), then Add.
+4. Find **Dinner Shopping Card**, open it, and select Download. Use the default branch if asked.
+5. Reload your browser.
+6. Create the dedicated Local to-do list described below, then add the card YAML in step 4. Skip the manual file-copy and resource steps if HACS has registered the resource.
+
+If the card does not load, check Settings → Dashboards → Resources. The HACS JavaScript Module URL is:
+
+`/hacsfiles/dinner-shopping-card./dinner-shopping-card.js`
+
+For YAML-managed resources, add that URL with `type: module`. If you installed manually before, remove the old `/local/dinner-shopping-card.js` resource entry so only the HACS copy is loaded. This does not delete your to-do data.
+
+This is a HACS **custom repository**; it has not been submitted to the default catalog. The manifest explicitly specifies the JavaScript filename because the repository name ends in a dot. HACS installation still needs verification on a live Home Assistant instance.
+
 ## 1. Create the storage list
 
 In Home Assistant, open Settings → Devices & services → Add integration → Local to-do.
