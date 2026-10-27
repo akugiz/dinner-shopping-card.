@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.2
+
+- Sort items, ingredient choices, saved groups, and shopping entries alphabetically using the browser locale.
+- Keep General items first and keep shopping recipe groups separate.
+
 ## 3.1.1
 
 - Highlight catalogue items green when they have an unticked entry anywhere in Shopping.

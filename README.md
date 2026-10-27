@@ -1,6 +1,6 @@
 # Dinner Shopping — independent storage
 
-**Version 3.1.1** adds a dedicated Home Assistant integration for the card. Normal use needs **no Local to-do list, no Shopping list integration, and no `entity:` in the card configuration**.
+**Version 3.1.2** adds a dedicated Home Assistant integration for the card. Normal use needs **no Local to-do list, no Shopping list integration, and no `entity:` in the card configuration**.
 
 Your items, reusable ingredient groups and shopping checkmarks are saved on your Home Assistant server. They survive browser refreshes and server restarts and are shared between devices.
 
@@ -36,7 +36,7 @@ Removing the old Dashboard download does not remove your Local to-do list or the
 6. Refresh your browser or fully reload the Home Assistant app.
 7. Add the card configuration below.
 
-The integration automatically serves and loads the bundled JavaScript. No manual dashboard resource entry is required. The card should display **v3.1.1 · Independent storage**.
+The integration automatically serves and loads the bundled JavaScript. No manual dashboard resource entry is required. The card should display **v3.1.2 · Independent storage**.
 
 Future HACS Integration updates include both the backend and the card. Restart Home Assistant and refresh browsers after updating.
 
@@ -145,3 +145,5 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 The backend's authenticated WebSocket commands are `dinner_shopping/get` and `dinner_shopping/action`. Each change carries the last-read revision. Writes are serialized and saved before acknowledgment. The existing record format is reused internally for migration compatibility; native storage does not create or call to-do entities.
 
 References: [Home Assistant WebSocket extensions](https://contributors.home-assistant.io/frontend/extending/websocket-api/), [HACS custom repositories](https://www.hacs.dev/docs/faq/custom_repositories/).
+
+Items, saved groups, ingredient choices, and shopping entries are sorted alphabetically. General items stay first; recipe groups remain separate.

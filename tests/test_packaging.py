@@ -17,11 +17,11 @@ class PackagingTests(unittest.TestCase):
         self.assertFalse(hacs.get('content_in_root', False))
         self.assertNotIn('filename', hacs)
         self.assertEqual(manifest['domain'], 'dinner_shopping')
-        self.assertEqual(manifest['version'], '3.1.1')
+        self.assertEqual(manifest['version'], '3.1.2')
         self.assertIn('frontend', manifest['dependencies'])
         self.assertTrue(manifest['config_flow'])
         self.assertEqual((ROOT / 'dinner-shopping-card.js').read_bytes(), (COMPONENT / 'www/dinner-shopping-card.js').read_bytes())
-        self.assertIn('v3.1.1', (COMPONENT / 'www/dinner-shopping-card.js').read_text())
+        self.assertIn('v3.1.2', (COMPONENT / 'www/dinner-shopping-card.js').read_text())
 
 
 class FrontendTests(unittest.IsolatedAsyncioTestCase):
@@ -59,7 +59,7 @@ class FrontendTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(Path(self.routes[0].path).is_file())
         self.assertFalse(self.routes[0].cache_headers)
         self.assertEqual(self.routes[0].url_path,'/dinner_shopping/dinner-shopping-card.js')
-        self.assertIn('?v=3.1.1',next(iter(self.urls)))
+        self.assertIn('?v=3.1.2',next(iter(self.urls)))
         unload(self.hass)
         unload(self.hass)
         self.assertFalse(self.urls)

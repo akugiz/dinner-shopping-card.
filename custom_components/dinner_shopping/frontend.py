@@ -4,7 +4,7 @@ from pathlib import Path
 from homeassistant.components import frontend
 from homeassistant.components.http import StaticPathConfig
 
-VERSION = "3.1.1"
+VERSION = "3.1.2"
 CARD_PATH = "/dinner_shopping/dinner-shopping-card.js"
 CARD_URL = f"{CARD_PATH}?v={VERSION}"
 REGISTERED = "dinner_shopping_frontend_registered"

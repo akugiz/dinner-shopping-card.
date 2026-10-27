@@ -1,8 +1,9 @@
-/* Dinner Shopping Card v3.1.1 — independent Dinner Shopping storage, with optional legacy compatibility. */
+/* Dinner Shopping Card v3.1.2 — independent Dinner Shopping storage, with optional legacy compatibility. */
 (() => {
   const PREFIX = 'dinner-shopping-card:v2:';
   const OLD = 'dinner-shopping-card:v1:';
   const norm = s => String(s || '').trim().toLocaleLowerCase();
+  const alphabet = (a, b) => String(a || '').trim().localeCompare(String(b || '').trim(), undefined, {sensitivity:'base', numeric:true});
   const id = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   class DinnerShoppingCard extends HTMLElement {
     constructor() {
@@ -38,9 +39,9 @@
       } catch { /* Leave unrelated or malformed records untouched. */ }
       return null;
     }
-    ofKind(kind) { return this.records.filter(r => this.meta(r)?.kind === kind); }
+    ofKind(kind) { return this.records.filter(r => this.meta(r)?.kind === kind).sort((a,b) => alphabet(a.summary,b.summary)); }
     ingredients(group) { return this.ofKind('ingredient').filter(r => this.meta(r).group === group); }
-    shopping() { return this.records.filter(r => ['shop','old-shop'].includes(this.meta(r)?.kind)); }
+    shopping() { return this.records.filter(r => ['shop','old-shop'].includes(this.meta(r)?.kind)).sort((a,b) => alphabet(a.summary,b.summary)); }
     async read() {
       const entity = this.config.entity;
       let records;
@@ -208,7 +209,7 @@
       // Also keep empty v1 dinner headings visible until the user explicitly clears them.
       for(const r of this.ofKind('old-group')) {const m=this.meta(r);if(!buckets.has(m.group))buckets.set(m.group,{name:m.groupName,records:[]});}
       if(!buckets.size) this.node('p','Your shopping list is empty. Add an item above to get started.',card,'empty');
-      const ordered=[...buckets].sort(([a],[b])=>a===''?-1:b===''?1:0);
+      const ordered=[...buckets].sort(([a,x],[b,y])=>a===b?0:a===''?-1:b===''?1:alphabet(x.name,y.name));
       for(const [key,bucket] of ordered) {
         const section=this.section(card,bucket.name || 'General items'); section.dataset.group=key;
         this.node('small',`${bucket.records.filter(r=>r.status==='completed').length} of ${bucket.records.length} picked up`,section);
@@ -310,7 +311,7 @@
         @media(max-width:380px){ha-card{padding:12px}section{padding:12px}.row{gap:5px}}
       `,this.shadowRoot);
       const card=this.node('ha-card',null,this.shadowRoot);this.node('h2',this.config.title||'Dinner shopping',card);
-      this.node('span',`Saved groups & shopping · v3.1.1 · ${this.config.entity ? 'Legacy storage' : 'Independent storage'}`,card,'version');
+      this.node('span',`Saved groups & shopping · v3.1.2 · ${this.config.entity ? 'Legacy storage' : 'Independent storage'}`,card,'version');
       if(this.config.entity) this.node('p','This card still uses your old list. Set up the Dinner Shopping integration and remove entity from the card configuration to use independent storage.',card,'hint');
       if(!this.config.entity && this.config.import_from && this.loaded) this.button('Import previous list',card,()=>{if(confirm('Copy your old Dinner Shopping items here? The old list will be kept.'))this.run(()=>this.importPreviousList());},true);
       const nav=this.node('nav',null,card);nav.setAttribute('aria-label','Shopping sections');
