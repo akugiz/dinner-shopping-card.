@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.0
+
+- Add the Dinner Shopping custom integration with independent persistent storage.
+- Default the card to native storage with no to-do entity configuration.
+- Save changes with revision checks to reject stale writes from other devices.
+- Add an optional non-destructive import from old v1/v2 Local to-do records.
+- Preserve legacy card configurations during a gradual upgrade.
+- Add Python storage tests and a native JS-to-Python workflow test.
+- Document the separate one-time integration installation in the same repository.
+
 ## 2.0.0
 
 - Add Shopping, Saved groups, and Items tabs.

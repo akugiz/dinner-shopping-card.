@@ -1,0 +1,12 @@
+{
+  "title": "Dinner Shopping",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Dinner Shopping",
+        "description": "Create independent storage for your items, saved ingredient groups and shopping list. No to-do list is needed. This is one shared list: all signed-in Home Assistant users can view and edit it. Add the Dinner Shopping card to your dashboard after setup."
+      }
+    },
+    "abort": {"already_configured": "Dinner Shopping is already set up."}
+  }
+}

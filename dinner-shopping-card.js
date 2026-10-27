@@ -1,4 +1,4 @@
-/* Dinner Shopping Card v2.0.0 — saved groups and a grouped shopping list. */
+/* Dinner Shopping Card v3.0.0 — independent Dinner Shopping storage, with optional legacy compatibility. */
 (() => {
   const PREFIX = 'dinner-shopping-card:v2:';
   const OLD = 'dinner-shopping-card:v1:';
@@ -11,15 +11,17 @@
       this.drafts = new Map(); this.error = ''; this.notice = '';
     }
     setConfig(config) {
-      if (!config.entity?.startsWith('todo.')) throw new Error('Choose a dedicated Local to-do entity, e.g. todo.dinner_shopping.');
+      if (config.entity && !config.entity.startsWith('todo.')) throw new Error('For independent storage, remove entity from the card configuration.');
+      if (config.import_from && !config.import_from.startsWith('todo.')) throw new Error('import_from must be the old todo entity ID.');
       if (this.busy && this.config?.entity !== config.entity) throw new Error('Wait for the current save before changing the entity.');
-      if (this.config?.entity !== config.entity) { this.records = []; this.loaded = false; this.drafts.clear(); }
+      if (this.config?.entity !== config.entity) { this.records = []; this.loaded = false; this.revision = undefined; this.drafts.clear(); }
       this.config = {...config}; this.render(); this.refresh();
     }
     set hass(hass) { this._hass = hass; if (!this.loaded) this.refresh(); }
     connectedCallback() { clearInterval(this.timer); this.timer = setInterval(() => this.refresh(), 5000); this.refresh(); }
     disconnectedCallback() { clearInterval(this.timer); }
     getCardSize() { return 6; }
+    static getStubConfig() { return {type:'custom:dinner-shopping-card', title:'Dinner shopping'}; }
     meta(record) {
       try {
         const d = record.description || '';
@@ -41,10 +43,24 @@
     shopping() { return this.records.filter(r => ['shop','old-shop'].includes(this.meta(r)?.kind)); }
     async read() {
       const entity = this.config.entity;
-      const response = await this._hass.callWS({type:'call_service', domain:'todo', service:'get_items', target:{entity_id:entity}, service_data:{}, return_response:true});
+      let records;
+      if (entity) {
+        const response = await this._hass.callWS({type:'call_service', domain:'todo', service:'get_items', target:{entity_id:entity}, service_data:{}, return_response:true});
+        records = response.response?.[entity]?.items;
+      } else {
+        let response;
+        try { response = await this._hass.callWS({type:'dinner_shopping/get'}); }
+        catch(e) {
+          if (['unknown_command','not_loaded'].includes(e.code)) throw new Error('Install and add the Dinner Shopping integration in Settings → Devices & services, then press Retry refresh.');
+          throw e;
+        }
+        if (entity !== this.config.entity) return;
+        if (!Number.isInteger(response.revision)) throw new Error('Dinner Shopping returned an invalid version. Update its integration and card together.');
+        this.revision = response.revision;
+        records = response.items;
+      }
       if (entity !== this.config.entity) return;
-      const records = response.response?.[entity]?.items;
-      if (!Array.isArray(records)) throw new Error('Could not read this Local to-do list. Check the entity ID.');
+      if (!Array.isArray(records)) throw new Error('Could not read shopping data. Check the Dinner Shopping integration.');
       this.records = records; this.loaded = true;
     }
     async refresh() {
@@ -60,7 +76,25 @@
       } catch (e) { this.connectionError = e.message || String(e); this.render(); }
       finally { this.loading = false; }
     }
-    async service(action, data) { await this._hass.callService('todo', action, {...data, entity_id:this.config.entity}); }
+    async service(action, data) {
+      if (this.config.entity) {
+        await this._hass.callService('todo', action, {...data, entity_id:this.config.entity});
+      } else {
+        const result = await this._hass.callWS({type:'dinner_shopping/action', action, data, revision:this.revision});
+        if (!Array.isArray(result.items) || !Number.isInteger(result.revision)) throw new Error('Save response was incomplete. Refresh before trying again.');
+        this.records = result.items; this.revision = result.revision;
+      }
+    }
+    async importPreviousList() {
+      if (this.config.entity || !this.config.import_from) throw new Error('Configure import_from on an independent-storage card first.');
+      const source = this.config.import_from;
+      const response = await this._hass.callWS({type:'call_service', domain:'todo', service:'get_items', target:{entity_id:source}, service_data:{}, return_response:true});
+      const items = response.response?.[source]?.items;
+      if (!Array.isArray(items)) throw new Error('Could not read the old list. Check import_from.');
+      const known = items.filter(item => this.meta(item));
+      await this.service('import',{source,items:known});
+      this.notice = 'Previous items copied. The old list was left unchanged. You can remove import_from from this card now.';
+    }
     async create(name, metadata) {
       const m = {id:id(), ...metadata};
       await this.service('add_item',{item:name.trim(), description:PREFIX + JSON.stringify(m)});
@@ -266,7 +300,9 @@
         @media(max-width:380px){ha-card{padding:12px}section{padding:12px}.row{gap:5px}}
       `,this.shadowRoot);
       const card=this.node('ha-card',null,this.shadowRoot);this.node('h2',this.config.title||'Dinner shopping',card);
-      this.node('span','Saved groups & shopping · v2.0.0',card,'version');
+      this.node('span',`Saved groups & shopping · v3.0.0 · ${this.config.entity ? 'Legacy storage' : 'Independent storage'}`,card,'version');
+      if(this.config.entity) this.node('p','This card still uses your old list. Set up the Dinner Shopping integration and remove entity from the card configuration to use independent storage.',card,'hint');
+      if(!this.config.entity && this.config.import_from && this.loaded) this.button('Import previous list',card,()=>{if(confirm('Copy your old Dinner Shopping items here? The old list will be kept.'))this.run(()=>this.importPreviousList());},true);
       const nav=this.node('nav',null,card);nav.setAttribute('aria-label','Shopping sections');
       for(const [tab,label] of [['shopping','Shopping'],['groups','Saved groups'],['items','Items']]) {
         const b=this.button(label,nav,()=>{this.tab=tab;this.render();},true);b.classList.toggle('active',tab===this.tab);b.setAttribute('aria-pressed',String(tab===this.tab));

@@ -1,0 +1,13 @@
+{
+  "domain": "dinner_shopping",
+  "name": "Dinner Shopping",
+  "codeowners": ["@akugiz"],
+  "config_flow": true,
+  "dependencies": ["websocket_api"],
+  "documentation": "https://github.com/akugiz/dinner-shopping-card.",
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/akugiz/dinner-shopping-card./issues",
+  "requirements": [],
+  "version": "3.0.0"
+}
