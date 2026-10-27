@@ -19,6 +19,7 @@ from homeassistant.helpers.storage import Store
 
 from .const import DOMAIN, STORAGE_KEY, STORAGE_VERSION
 from .storage import ShoppingError, ShoppingStorage
+from .frontend import async_setup_frontend, async_unload_frontend
 
 _LOGGER = logging.getLogger(__name__)
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
@@ -60,12 +61,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await storage.load()
     except (OSError, ValueError) as err:
         raise ConfigEntryNotReady(f"Dinner Shopping data could not be loaded: {err}") from err
+    await async_setup_frontend(hass)
     hass.data[DOMAIN] = storage
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Stop access but retain the saved data for reinstallation."""
+    async_unload_frontend(hass)
     storage = hass.data.get(DOMAIN)
     if storage is not None:
         await storage.close()

@@ -1,4 +1,4 @@
-/* Dinner Shopping Card v3.0.0 — independent Dinner Shopping storage, with optional legacy compatibility. */
+/* Dinner Shopping Card v3.1.0 — independent Dinner Shopping storage, with optional legacy compatibility. */
 (() => {
   const PREFIX = 'dinner-shopping-card:v2:';
   const OLD = 'dinner-shopping-card:v1:';
@@ -300,7 +300,7 @@
         @media(max-width:380px){ha-card{padding:12px}section{padding:12px}.row{gap:5px}}
       `,this.shadowRoot);
       const card=this.node('ha-card',null,this.shadowRoot);this.node('h2',this.config.title||'Dinner shopping',card);
-      this.node('span',`Saved groups & shopping · v3.0.0 · ${this.config.entity ? 'Legacy storage' : 'Independent storage'}`,card,'version');
+      this.node('span',`Saved groups & shopping · v3.1.0 · ${this.config.entity ? 'Legacy storage' : 'Independent storage'}`,card,'version');
       if(this.config.entity) this.node('p','This card still uses your old list. Set up the Dinner Shopping integration and remove entity from the card configuration to use independent storage.',card,'hint');
       if(!this.config.entity && this.config.import_from && this.loaded) this.button('Import previous list',card,()=>{if(confirm('Copy your old Dinner Shopping items here? The old list will be kept.'))this.run(()=>this.importPreviousList());},true);
       const nav=this.node('nav',null,card);nav.setAttribute('aria-label','Shopping sections');

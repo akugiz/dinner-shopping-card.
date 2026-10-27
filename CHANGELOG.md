@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.1.0
+
+- Package the storage integration and card together for HACS Integration installation.
+- Automatically serve and load the bundled card; no ZIP, manual copy, or dashboard resource is required.
+- Keep frontend route registration safe across integration reloads.
+- Document migration from the old HACS Dashboard category.
+
 ## 3.0.0
 
 - Add the Dinner Shopping custom integration with independent persistent storage.

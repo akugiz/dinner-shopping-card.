@@ -1,6 +1,6 @@
 # Dinner Shopping — independent storage
 
-**Version 3.0.0** adds a dedicated Home Assistant integration for the card. Normal use needs **no Local to-do list, no Shopping list integration, and no `entity:` in the card configuration**.
+**Version 3.1.0** adds a dedicated Home Assistant integration for the card. Normal use needs **no Local to-do list, no Shopping list integration, and no `entity:` in the card configuration**.
 
 Your items, reusable ingredient groups and shopping checkmarks are saved on your Home Assistant server. They survive browser refreshes and server restarts and are shared between devices.
 
@@ -12,41 +12,35 @@ Your items, reusable ingredient groups and shopping checkmarks are saved on your
 
 Add Banana bread to shopping and its ingredients appear under a separate Banana bread heading alongside General items. Clearing that shopping section keeps the saved group for next time. Matching ingredients in different sections have independent quantities and checkmarks.
 
-## Install the storage integration — once
+## Install everything through HACS
 
-This repository contains both the card and the storage integration. Its existing HACS entry remains a **Dashboard** entry and downloads the card only. Install the backend folder separately:
+No ZIP download or manual file copying is needed. HACS now installs the integration and its bundled card together.
 
-1. On this GitHub repository, choose **Code → Download ZIP** and extract it.
-2. Find the folder `custom_components/dinner_shopping` inside the extracted files.
-3. Copy the entire **dinner_shopping** folder into your Home Assistant `/config/custom_components/` directory. Create `custom_components` if needed.
-4. Check that the resulting path is `/config/custom_components/dinner_shopping/manifest.json`, not a second nested `dinner_shopping` folder.
-5. **Restart Home Assistant.**
-6. Open **Settings → Devices & services → Add integration**, search **Dinner Shopping**, and submit its setup form.
+### If you added the old Dashboard repository
 
-No credentials or to-do entity are required. The integration supplies storage and does not create a device or an entity. One shared database is available to all signed-in Home Assistant users; those users can view and edit it.
+1. In HACS, remove the old **Dinner Shopping Card** Dashboard download.
+2. Open HACS → three-dot menu → Custom repositories and remove its old Dashboard registration if it remains.
+3. Follow the Integration installation steps below using the same repository URL.
+4. Under Settings → Dashboards → Resources, remove any old `/hacsfiles/dinner-shopping-card./dinner-shopping-card.js` or `/local/dinner-shopping-card.js` entries if they remain. The new integration loads its bundled card automatically.
 
-For future backend updates, replace this same integration folder and restart Home Assistant. HACS Dashboard updates do not update Python integration files.
+Removing the old Dashboard download does not remove your Local to-do list or the independent integration's saved data. Do not delete those data stores when changing HACS category.
 
-## Install or update the card with HACS
+### Integration installation
 
-The repository name ends with a dot: `akugiz/dinner-shopping-card.` Keep it in URLs.
+1. Open **HACS → three-dot menu → Custom repositories**.
+2. Add `https://github.com/akugiz/dinner-shopping-card.` and choose **Integration**.
+   The final dot is part of the repository name.
+3. Find **Dinner Shopping**, select **Download**, and choose the default branch if asked.
+4. **Restart Home Assistant.**
+5. Go to **Settings → Devices & services → Add integration → Dinner Shopping** and submit the setup form. If you already added this integration manually in v3.0, keep that existing entry.
+6. Refresh your browser or fully reload the Home Assistant app.
+7. Add the card configuration below.
 
-**New installation:**
+The integration automatically serves and loads the bundled JavaScript. No manual dashboard resource entry is required. The card should display **v3.1.0 · Independent storage**.
 
-1. Open HACS → three-dot menu → Custom repositories.
-2. Add `https://github.com/akugiz/dinner-shopping-card.` and choose **Dashboard** (Lovelace/Plugin in older versions).
-3. Find Dinner Shopping Card and select Download; use the default branch if asked.
-4. Refresh your browser or fully reload the Home Assistant app.
+Future HACS Integration updates include both the backend and the card. Restart Home Assistant and refresh browsers after updating.
 
-**Updating:** open Dinner Shopping Card in HACS, choose Update information and then Redownload the default branch. Refresh every device. Look for **v3.0.0 · Independent storage** beneath the title.
-
-If a resource entry is needed, add this as a **JavaScript Module** in Settings → Dashboards → Resources:
-
-```text
-/hacsfiles/dinner-shopping-card./dinner-shopping-card.js
-```
-
-For YAML-managed resources, use that URL with `type: module`. If you previously installed manually, remove the old `/local/dinner-shopping-card.js` resource entry so only one version is loaded.
+No credentials, device or to-do entity are required. There is one shared database that all signed-in Home Assistant users can view and edit.
 
 ## Add the independent card
 
@@ -117,9 +111,13 @@ Items already in General items are not moved or automatically combined with a re
 - Quantities are text; shared ingredients are not automatically combined or converted between units.
 - There is one shared household store, with a limit of 5,000 records including catalogue items and templates.
 
-## Manual card installation
+## Developer packaging
 
-Copy `dinner-shopping-card.js` into `/config/www/`, add `/local/dinner-shopping-card.js?v=3.0.0` as a JavaScript Module resource, and reload. Restart Home Assistant if you created `www` for the first time. The storage integration above is still required for independent mode.
+All runtime files, including the JavaScript card, are under `custom_components/dinner_shopping/`, so HACS installs them as one integration. `hacs.json` uses the standard integration layout, without `content_in_root` or a dashboard `filename` override.
+
+The root `dinner-shopping-card.js` remains a development source copy. Keep it byte-identical to `custom_components/dinner_shopping/www/dinner-shopping-card.js`; the packaging tests check this.
+
+The integration serves `/dinner_shopping/dinner-shopping-card.js` and registers the versioned URL as an extra frontend module. Its static route is registered once per Home Assistant lifetime so entry reloads do not duplicate the route. Unloading removes the module from future page loads, while retaining saved shopping data.
 
 ## Validation
 
@@ -138,7 +136,7 @@ node tests/native.test.cjs
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-`tests/card.spec.cjs` contains additional browser workflow tests for the legacy adapter. They were not run because the test Chromium download failed. No live Home Assistant installation was available; integration loading, visual layout, HACS download and on-device behavior still need verification.
+`tests/card.spec.cjs` contains additional browser workflow tests for the legacy adapter. They were not run because the test Chromium download failed. No live Home Assistant installation was available; integration loading, visual layout, HACS download and on-device behavior still need verification. Packaging and frontend registration are tested with mocked Home Assistant APIs.
 
 ## Developer notes
 
