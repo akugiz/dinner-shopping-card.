@@ -1,4 +1,4 @@
-/* Dinner Shopping Card v3.1.0 — independent Dinner Shopping storage, with optional legacy compatibility. */
+/* Dinner Shopping Card v3.1.1 — independent Dinner Shopping storage, with optional legacy compatibility. */
 (() => {
   const PREFIX = 'dinner-shopping-card:v2:';
   const OLD = 'dinner-shopping-card:v1:';
@@ -270,12 +270,20 @@
         this.button('Delete group',actions,()=>{if(confirm(`Delete saved group ${group.summary}? Current shopping items are kept.`))this.run(()=>this.deleteGroup(groupId));},true);
       }
     }
+    isOnShoppingList(product) {
+      const productId = this.meta(product).id;
+      return this.shopping().some(item => item.status !== 'completed' &&
+        (this.meta(item).product === productId || norm(item.summary) === norm(product.summary)));
+    }
     itemsView(card) {
       this.node('p','Your reusable items. Add them to shopping, or choose them when building a saved group.',card);
       this.form(card,'product',[['New item, e.g. Bananas',true]],'Save item',name=>this.ensureProduct(name));
       for(const product of this.ofKind('product')) {
-        const row=this.node('div',null,card,'row catalog');this.node('span',product.summary,row,'grow');
-        this.button('Add to shopping',row,()=>this.run(()=>this.addGeneral(product.summary)),true);
+        const inShopping = this.isOnShoppingList(product);
+        const row=this.node('div',null,card,`row catalog${inShopping ? ' in-shopping' : ''}`);this.node('span',product.summary,row,'grow');
+        const add=this.button(inShopping ? '✓ In shopping list' : 'Add to shopping',row,()=>this.run(()=>this.addGeneral(product.summary)),true);
+        add.disabled=inShopping;
+        if(inShopping) { add.classList.add('in-shopping-button'); add.title='Already on your shopping list'; }
         const b=this.button('×',row,()=>{if(confirm(`Remove ${product.summary} from Items? Saved groups and shopping copies are kept.`))this.run(()=>this.remove(product));},true);b.setAttribute('aria-label',`Delete saved item ${product.summary}`);
       }
     }
@@ -294,13 +302,15 @@
         form,.picker{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}input[type=text],select{font:inherit;color:inherit;background:var(--secondary-background-color,#f7f8f8);border:1px solid var(--divider-color,#ddd);padding:10px;border-radius:9px;min-width:0;flex:1 1 130px;min-height:44px}input[placeholder^=Quantity]{flex-basis:90px}
         section{margin-top:16px;padding:15px;border:1px solid var(--divider-color,#ddd);border-radius:12px}
         .row{display:flex;gap:8px;align-items:center;min-height:48px}.row label{display:flex;align-items:center;gap:12px;flex:1;min-width:0;cursor:pointer}.grow{flex:1;min-width:0}.row span{overflow-wrap:anywhere}.row button{font-size:12px;padding:8px}.catalog{border-bottom:1px solid var(--divider-color,#eee);padding:8px 0}
+        .catalog.in-shopping{background:rgba(46,160,67,.14);border-left:3px solid #2ea043;border-radius:9px;padding:8px 10px;margin:4px 0}
+        .row .in-shopping-button:disabled{background:#237a3b;color:#fff;opacity:1;cursor:default}
         input[type=checkbox]{width:22px;height:22px;flex-shrink:0;accent-color:var(--primary-color,#008c80)}.done span{text-decoration:line-through;color:var(--secondary-text-color,#777)}
         .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.hint,.empty{padding:8px 0}.error{color:var(--error-color,#b3261e);padding:10px 0;white-space:pre-wrap}.notice{color:var(--primary-text-color,#222);border-left:3px solid var(--primary-color,#008c80);padding:8px 12px;margin:10px 0;font-size:14px}
         button:disabled,input:disabled,select:disabled{opacity:.5;cursor:wait}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--primary-color,#008c80);outline-offset:2px}
         @media(max-width:380px){ha-card{padding:12px}section{padding:12px}.row{gap:5px}}
       `,this.shadowRoot);
       const card=this.node('ha-card',null,this.shadowRoot);this.node('h2',this.config.title||'Dinner shopping',card);
-      this.node('span',`Saved groups & shopping · v3.1.0 · ${this.config.entity ? 'Legacy storage' : 'Independent storage'}`,card,'version');
+      this.node('span',`Saved groups & shopping · v3.1.1 · ${this.config.entity ? 'Legacy storage' : 'Independent storage'}`,card,'version');
       if(this.config.entity) this.node('p','This card still uses your old list. Set up the Dinner Shopping integration and remove entity from the card configuration to use independent storage.',card,'hint');
       if(!this.config.entity && this.config.import_from && this.loaded) this.button('Import previous list',card,()=>{if(confirm('Copy your old Dinner Shopping items here? The old list will be kept.'))this.run(()=>this.importPreviousList());},true);
       const nav=this.node('nav',null,card);nav.setAttribute('aria-label','Shopping sections');

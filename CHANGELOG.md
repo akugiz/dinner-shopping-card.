@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.1
+
+- Highlight catalogue items green when they have an unticked entry anywhere in Shopping.
+- Show an In shopping list label and disable duplicate adds from the Items tab.
+- Clear the highlight when all matching entries are picked up or removed.
+
 ## 3.1.0
 
 - Package the storage integration and card together for HACS Integration installation.

@@ -1,6 +1,6 @@
 # Dinner Shopping — independent storage
 
-**Version 3.1.0** adds a dedicated Home Assistant integration for the card. Normal use needs **no Local to-do list, no Shopping list integration, and no `entity:` in the card configuration**.
+**Version 3.1.1** adds a dedicated Home Assistant integration for the card. Normal use needs **no Local to-do list, no Shopping list integration, and no `entity:` in the card configuration**.
 
 Your items, reusable ingredient groups and shopping checkmarks are saved on your Home Assistant server. They survive browser refreshes and server restarts and are shared between devices.
 
@@ -36,7 +36,7 @@ Removing the old Dashboard download does not remove your Local to-do list or the
 6. Refresh your browser or fully reload the Home Assistant app.
 7. Add the card configuration below.
 
-The integration automatically serves and loads the bundled JavaScript. No manual dashboard resource entry is required. The card should display **v3.1.0 · Independent storage**.
+The integration automatically serves and loads the bundled JavaScript. No manual dashboard resource entry is required. The card should display **v3.1.1 · Independent storage**.
 
 Future HACS Integration updates include both the backend and the card. Restart Home Assistant and refresh browsers after updating.
 
@@ -87,6 +87,8 @@ For a gradual upgrade, an existing card containing `entity: todo...` still uses 
 7. After the trip, use **Clear from shopping**. Next time, add Banana bread again; its new shopping checkboxes start unticked.
 
 Items already in General items are not moved or automatically combined with a recipe's ingredients. Remove a general copy with × if you only need the grouped copy.
+
+In **Items**, products with an unticked shopping entry are highlighted green and show **✓ In shopping list**. This includes ingredients in recipe groups. The highlight clears when all matching shopping entries are ticked or removed. You can still add an intentional extra general item from the Shopping tab.
 
 ## Editing and reuse
 
